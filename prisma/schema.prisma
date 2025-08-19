@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  AGENT
+}
+
+model User {
+  userId        String    @id @default(uuid())
+  name          String
+  firstname     String
+  email         String    @unique
+  contact       String    @unique
+  password      String
+  role          Role      @default(AGENT)
+  centerId      Int
+  createdAt     DateTime  @default(now())
+  emailVerified DateTime?
+}
+
+// model Commune {
+//   communeId Int         @id @default(autoincrement())
+//   nom       String
+//   createdAt DateTime    @default(now())
+//   fokontany Fokontany[]
+// }
+
+model Fokontany {
+  fokontanyId   Int        @id @default(autoincrement())
+  codeFokontany String     @unique
+  nom           String
+  createdAt     DateTime   @default(now())
+  personne      Personne[]
+}
+
+model Personne {
+  personneId          Int      @id @default(autoincrement())
+  nom                 String
+  prenom              String
+  sexe                String
+  dateNaissance       DateTime
+  lieuDeNaissance     String
+  CIN                 String @unique
+  delivree            DateTime
+  lieuDelivree        String
+  asa                 String
+  nomPere             String?
+  nomMere             String?
+  fonenanaAnkehitriny String
+  fonenanaTaloha      String
+  zompirenena         String
+
+  createdAt   DateTime  @default(now())
+  contact     String
+  fokontanyId Int
+  fokontany   Fokontany @relation(fields: [fokontanyId], references: [fokontanyId])
+}
+
+// famille   Famille[]
+// mouvementsDepart Mouvement[] @relation('FokontanyDepart')
+// mouvementsArrive Mouvement[] @relation('FokontanyArrive')
+model Famille {
+  familleId   Int      @id @default(autoincrement())
+  nom         String
+  createdAt   DateTime @default(now())
+  fokontanyId Int
+  // fokontany   Fokontany  @relation(fields: [fokontanyId], references: [fokontanyId])
+}
+
+// famille   Famille  @relation(fields: [familleId], references: [familleId])
+// mouvement Mouvement[]
+
+// model Mouvement {
+// mouvementId Int @id @default(autoincrement())
+// dateMouvement       DateTime
+// typeMouvement       String 
+// numeroPasseport  String?
+
+// fonkotanyDepartId Int?
+// fonkotanyDepart   Fokontany? @relation("FokontanyDepart", fields: [fonkotanyDepartId], references: [fonkotanyId])
+// nomExterneDepart  String?
+
+// fonkotanyArriveId Int?
+// fonkotanyArrive   Fokontany? @relation("FokontanyArrive", fields: [fonkotanyArriveId], references: [fonkotanyId])
+// nomExterneArrive  String? 
+
+// personneId Int
+// personne   Personne @relation(fields: [personneId], references: [personneId])
+// }
