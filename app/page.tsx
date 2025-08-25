@@ -1,4 +1,4 @@
-import PersonnePage from "./dashboard/personne/page";
+// import PersonnePage from "./dashboard/personne/page";
 
 export default function Home() {
   return (

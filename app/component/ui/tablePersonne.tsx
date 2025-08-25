@@ -153,28 +153,28 @@ const PersonneTable = () => {
   
     
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="w-full max-w-md">
+        <SheetContent side="right" className="w-full h-150 py-4 border border-lg max-w-md">
           <SheetHeader>
             <SheetTitle>Détails de la personne</SheetTitle>
           </SheetHeader>
           {selectedPersonne && (
-            <div className="space-y-2 text-sm mt-2">
-              <div><strong>Nom:</strong> {selectedPersonne.nom}</div>
-              <div><strong>Prénom:</strong> {selectedPersonne.prenom}</div>
-              <div><strong>Sexe:</strong> {selectedPersonne.sexe}</div>
-              <div><strong>Date de naissance:</strong> {selectedPersonne.dateNaissance ? new Date(selectedPersonne.dateNaissance).toLocaleDateString() : "N/A"}</div>
-              <div><strong>Lieu de naissance:</strong> {selectedPersonne.lieuDeNaissance}</div>
-              <div><strong>CIN:</strong> {selectedPersonne.CIN}</div>
-              <div><strong>Date de délivrance:</strong> {selectedPersonne.delivree ? new Date(selectedPersonne.delivree).toLocaleDateString() : "N/A"}</div>
-              <div><strong>Lieu de délivrance:</strong> {selectedPersonne.lieuDelivree}</div>
-              <div><strong>Profession:</strong> {selectedPersonne.asa}</div>
-              <div><strong>Nom Père:</strong> {selectedPersonne.nomPere}</div>
-              <div><strong>Nom Mère:</strong> {selectedPersonne.nomMere}</div>
-              <div><strong>Résidence actuelle:</strong> {selectedPersonne.fonenanaAnkehitriny}</div>
-              <div><strong>Ancienne résidence:</strong> {selectedPersonne.fonenanaTaloha}</div>
-              <div><strong>Nationalité:</strong> {selectedPersonne.zompirenena}</div>
-              <div><strong>Contact:</strong> {selectedPersonne.contact}</div>
-              <div><strong>Fokontany:</strong> {selectedPersonne.fokontany?.nom ?? selectedPersonne.fokontanyId}</div>
+            <div className="space-y-2 px-4  text-sm mt-2">
+              <div><strong className="p-4">Nom:</strong> {selectedPersonne.nom}</div>
+              <div><strong className="p-4">Prénom:</strong> {selectedPersonne.prenom}</div>
+              <div><strong className="p-4">Sexe:</strong> {selectedPersonne.sexe}</div>
+              <div><strong className="p-4">Date de naissance:</strong> {selectedPersonne.dateNaissance ? new Date(selectedPersonne.dateNaissance).toLocaleDateString() : "N/A"}</div>
+              <div><strong className="p-4">Lieu de naissance:</strong> {selectedPersonne.lieuDeNaissance}</div>
+              <div><strong className="p-4">CIN:</strong> {selectedPersonne.CIN}</div>
+              <div><strong className="p-4">Date de délivrance:</strong> {selectedPersonne.delivree ? new Date(selectedPersonne.delivree).toLocaleDateString() : "N/A"}</div>
+              <div><strong className="p-4">Lieu de délivrance:</strong> {selectedPersonne.lieuDelivree}</div>
+              <div><strong className="p-4">Profession:</strong> {selectedPersonne.asa}</div>
+              <div><strong className="p-4">Nom Père:</strong> {selectedPersonne.nomPere}</div>
+              <div><strong className="p-4">Nom Mère:</strong> {selectedPersonne.nomMere}</div>
+              <div><strong className="p-4">Résidence actuelle:</strong> {selectedPersonne.fonenanaAnkehitriny}</div>
+              <div><strong className="p-4">Ancienne résidence:</strong> {selectedPersonne.fonenanaTaloha}</div>
+              <div><strong className="p-4">Nationalité:</strong> {selectedPersonne.zompirenena}</div>
+              <div><strong className="p-4">Contact:</strong> {selectedPersonne.contact}</div>
+              <div><strong className="p-4">Fokontany:</strong> {selectedPersonne.fokontany?.nom ?? selectedPersonne.fokontanyId}</div>
             </div>
           )}
         </SheetContent>
