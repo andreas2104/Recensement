@@ -188,3 +188,28 @@ export async function DELETE(_request: NextApiRequest, { params }: {params:Param
     await prisma.$disconnect();
   }
 }
+
+export async function GetpersonneByFokontany(CIN: string, nom: string, fokontanyId: number) {
+  const personnes = await prisma.personne.findMany({
+    where: {
+      fokontanyId: fokontanyId,
+      CIN: {
+        contains: CIN,
+        mode: 'insensitive', 
+      },
+      nom: {
+        contains: nom,
+        mode: 'insensitive', 
+      },
+    },
+    include: {
+      fokontany: {
+        select: {
+          nom: true,
+          codeFokontany: true, 
+        },
+      },
+    },
+  });
+  return personnes;
+}
