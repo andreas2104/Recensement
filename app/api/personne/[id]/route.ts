@@ -195,11 +195,9 @@ export async function GetpersonneByFokontany(CIN: string, nom: string, fokontany
       fokontanyId: fokontanyId,
       CIN: {
         contains: CIN,
-        mode: 'insensitive', 
       },
       nom: {
         contains: nom,
-        mode: 'insensitive', 
       },
     },
     include: {

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Personne } from "@/types/personne";
-import { addPersonne,deletePersonne,updatePersonne ,fetchPersonnes,getPersonneById} from "@/services/personneService";
+import { addPersonne,deletePersonne,updatePersonne ,fetchPersonnes,getPersonneById, getPersonneByFokontany} from "@/services/personneService";
 
 
 export const usePersonne = () => {
@@ -59,5 +59,34 @@ export const usePersonneById = (personneId: number | null) => {
     personne: data as Personne | null,
     isPending,
     error,
+  };
+};
+
+export const usePersonneByFokontany = (fokontanyId: number | null) => {
+  const isValidId = typeof fokontanyId === 'number' && !isNaN(fokontanyId);
+  const { data, isPending, error } = useQuery({
+    queryKey: ['personne', fokontanyId],
+    queryFn: async () => {
+      if (!isValidId) {
+        return [];
+      }
+      try {
+        return await getPersonneByFokontany(fokontanyId as number);
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message === "Le fokontany demandé n'existe pas.") {
+          throw new Error("Le fokontany demandé n'existe pas.");
+        }
+        throw err;
+      }
+    },
+    enabled: isValidId,
+    refetchOnWindowFocus: false,
+  });
+
+  return {
+    personnes: data as Personne[] | [],
+    isPending,
+    error,
+    fokontanyNotFound: error?.message === "Le fokontany demandé n'existe pas." ? true : false,
   };
 };

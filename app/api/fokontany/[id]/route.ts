@@ -113,3 +113,9 @@ export async function DELETE(
     await prisma.$disconnect();
   }
 }
+
+
+interface Params {
+  fokontanyId: string;
+}
+

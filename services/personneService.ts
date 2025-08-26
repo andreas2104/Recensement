@@ -86,3 +86,22 @@ export const getPersonneById = async (personneId: number): Promise<Personne> => 
     throw error;
   }
 };
+
+export const getPersonneByFokontany = async (fokontanyId: number): Promise<Personne[]> => {
+  try {
+    const response = await fetch(`/api/personne/fokontany/${fokontanyId}`, {
+      method: 'GET',
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      if (response.status === 404 && errorData.error === "Fokontany n'existe pas") {
+        throw new Error("Le fokontany demandé n'existe pas.");
+      }
+      throw new Error(errorData.error || 'Erreur lors de la récupération des personnes par fokontany');
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Erreur récupération personnes par fokontany:', error);
+    throw error;
+  }
+};
