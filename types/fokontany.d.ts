@@ -3,7 +3,7 @@ export interface Fokontany {
   codeFokontany: string;
   nom: string;
   createdAt: Date  | string;
-  personneCount?: number;
+  totalPersonnes?: number;
 }
 
 export interface GetPersonneInFokontany {

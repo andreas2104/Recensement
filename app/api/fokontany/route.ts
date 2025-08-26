@@ -5,16 +5,32 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    const data = await prisma.fokontany.findMany();
-    const formatData = data.map(data => ({
-      fokontanyId: data.fokontanyId,
-      nom: data.nom,
-      createdAt: data.createdAt,
+    const fokontany = await prisma.fokontany.findMany({
+      select: {
+        fokontanyId: true,
+        nom: true,
+        codeFokontany: true,
+        _count: {
+          select: {
+            personne: true, 
+          },
+        },
+      },
+    });
+
+    const formattedData = fokontany.map((f) => ({
+      id: f.fokontanyId,
+      nom: f.nom,
+      codeFokontany: f.codeFokontany,
+      totalPersonnes: f._count.personne,
     }));
-    return NextResponse.json(formatData);
-  }catch (error) {
+
+    return NextResponse.json(formattedData, { status: 200 });
+  } catch (error) {
     console.error("Error fetching fokontany:", error);
     return NextResponse.json({ error: "Failed to fetch fokontany" }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
