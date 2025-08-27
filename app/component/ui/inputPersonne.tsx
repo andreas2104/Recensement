@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useFokontany } from "@/hooks/useFokontany";
-// import { addPersonne, updatePersonne } from "@/services/personneService";
 import { usePersonne } from "@/hooks/usePersonne";
+import { toast, ToastContainer } from 'react-toastify'; 
+import 'react-toastify/dist/ReactToastify.css'; 
 
 type Sexe = 'M' | 'F';
 type Personne = {
@@ -30,8 +31,7 @@ type Personne = {
 type FormData = Omit<Personne, 'personneId'>;
 
 const formatCIN = (value: string): string => {
-  const numbers = value.replace(/\D/g, '');
-  // groupes de 3
+  const numbers = value.replace(/\D/g, '').slice(0, 12);
   return numbers.replace(/(.{3})(?=.)/g, '$1 ').trim();
 };
 
@@ -41,6 +41,17 @@ const formatContact = (value: string): string => {
   if (numbers.length <= 5) return `${numbers.slice(0, 3)} ${numbers.slice(3)}`;
   if (numbers.length <= 7) return `${numbers.slice(0, 3)} ${numbers.slice(3, 5)} ${numbers.slice(5)}`;
   return `${numbers.slice(0, 3)} ${numbers.slice(3, 5)} ${numbers.slice(5, 7)} ${numbers.slice(7, 10)}`;
+};
+
+const calculateAge = (dateNaissance: Date | undefined): number => {
+  if (!dateNaissance) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - dateNaissance.getFullYear();
+  const monthDiff = today.getMonth() - dateNaissance.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dateNaissance.getDate())) {
+    age--;
+  }
+  return age;
 };
 
 export default function InputPersonneModal({
@@ -72,8 +83,6 @@ export default function InputPersonneModal({
     nomFokontany: personne?.nomFokontany ?? '',
   });
 
-  const [message, setMessage] = useState<string>('');
-
   useEffect(() => {
     if (personne) {
       setFormData({
@@ -97,7 +106,6 @@ export default function InputPersonneModal({
     }
   }, [personne]);
 
-  // Gère inputs + formatage CIN/contact + conversion pour nomFokontany
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
@@ -107,7 +115,10 @@ export default function InputPersonneModal({
     }
 
     let formattedValue = value;
-    if (name === 'CIN') formattedValue = formatCIN(value);
+    if (name === 'CIN') {
+      const cleanedValue = value.replace(/\D/g, '').slice(0, 12);
+      formattedValue = formatCIN(cleanedValue);
+    }
     if (name === 'contact') formattedValue = formatContact(value);
 
     setFormData((prev) => ({ ...prev, [name]: formattedValue }));
@@ -119,10 +130,21 @@ export default function InputPersonneModal({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setMessage('');
+
+    const age = calculateAge(formData.dateNaissance);
+    if (!formData.dateNaissance || age < 18) {
+      toast.error("L'âge doit être d'au moins 18 ans.", { position: "top-right", autoClose: 3000 });
+      return;
+    }
+
+    const cleanedCIN = formData.CIN.replace(/\s/g, '');
+    if (cleanedCIN.length !== 12) {
+      toast.error("Le CIN doit contenir exactement 12 chiffres.", { position: "top-right", autoClose: 3000 });
+      return;
+    }
 
     if (!formData.nomFokontany) {
-      setMessage("Veuillez sélectionner un fokontany.");
+      toast.error("Veuillez sélectionner un fokontany.", { position: "top-right", autoClose: 3000 });
       return;
     }
 
@@ -131,23 +153,29 @@ export default function InputPersonneModal({
         ...formData,
         dateNaissance: formData.dateNaissance?.toISOString(),
         delivree: formData.delivree?.toISOString(),
-        CIN: formData.CIN.replace(/\s/g, ''),
+        CIN: cleanedCIN,
         contact: formData.contact.replace(/\s/g, ''),
       };
 
       let result: Personne;
       if (personne?.personneId) {
         result = await updatePersonne({ ...dataToSubmit, personneId: personne.personneId } as Personne);
+        toast.success("Personne modifiée avec succès !", { position: "top-right", autoClose: 3000 });
       } else {
         result = await addPersonne(dataToSubmit as Personne);
+        toast.success("Personne ajoutée avec succès !", { position: "top-right", autoClose: 3000 });
       }
 
-      setMessage("Personne ajoutée/modifiée avec succès !");
       onClose(result);
     } catch (error: any) {
       console.error("Erreur lors de la soumission:", error);
-      setMessage("Une erreur est survenue lors de la soumission: " + error.message);
+      toast.error(`Une erreur est survenue: ${error.message}`, { position: "top-right", autoClose: 3000 });
     }
+  };
+
+  const handleCancel = () => {
+    toast.info("Opération annulée.", { position: "top-right", autoClose: 2000 });
+    onClose();
   };
 
   if (isFokontanyPending) {
@@ -171,16 +199,8 @@ export default function InputPersonneModal({
       <div className="bg-white p-6 rounded-lg w-full max-w-md text-black shadow-lg max-h-screen overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">{personne ? 'Modifier une personne' : 'Ajouter une personne'}</h2>
 
-        {message && (
-          <div className="mb-4 text-center p-2 rounded-md bg-green-100 text-green-700">
-            {message}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-            {/* Nom / Prénom */}
             <div>
               <label className="block text-sm">Nom</label>
               <input
@@ -204,7 +224,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Sexe */}
             <div>
               <label className="block text-sm">Sexe</label>
               <select
@@ -220,7 +239,6 @@ export default function InputPersonneModal({
               </select>
             </div>
 
-            {/* Date de Naissance (DatePicker) */}
             <div>
               <label className="block text-sm">Date de Naissance</label>
               <DatePicker
@@ -239,7 +257,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Lieu de naissance */}
             <div>
               <label className="block text-sm">Lieu de Naissance</label>
               <input
@@ -252,7 +269,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* CIN (formaté) */}
             <div>
               <label className="block text-sm">CIN</label>
               <input
@@ -263,10 +279,11 @@ export default function InputPersonneModal({
                 onChange={handleChange}
                 className="border w-full p-2 rounded"
                 required
+                maxLength={15}
+                placeholder="XXX XXX XXX XXX"
               />
             </div>
 
-            {/* Date de délivrance (DatePicker) */}
             <div>
               <label className="block text-sm">Date de délivrance</label>
               <DatePicker
@@ -285,7 +302,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Lieu de délivrance */}
             <div>
               <label className="block text-sm">Lieu de délivrance</label>
               <input
@@ -298,7 +314,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Profession */}
             <div>
               <label className="block text-sm">Profession</label>
               <input
@@ -310,7 +325,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Nom du Père */}
             <div>
               <label className="block text-sm">Nom du Père</label>
               <input
@@ -323,7 +337,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Nom de la Mère */}
             <div>
               <label className="block text-sm">Nom de la Mère</label>
               <input
@@ -336,7 +349,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Résidence actuelle */}
             <div>
               <label className="block text-sm">Résidence Actuelle</label>
               <input
@@ -348,7 +360,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Ancienne résidence */}
             <div>
               <label className="block text-sm">Ancienne Résidence</label>
               <input
@@ -360,7 +371,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Nationalité */}
             <div>
               <label className="block text-sm">Nationalité</label>
               <input
@@ -373,7 +383,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Contact (formaté comme CIN) */}
             <div>
               <label className="block text-sm">Contact</label>
               <input
@@ -386,7 +395,6 @@ export default function InputPersonneModal({
               />
             </div>
 
-            {/* Fokontany (depuis ton hook) */}
             <div>
               <label className="block text-sm">Fokontany</label>
               <select
@@ -406,11 +414,10 @@ export default function InputPersonneModal({
             </div>
           </div>
 
-          {/* Boutons fixes en bas */}
           <div className="flex justify-end gap-2 pt-2 sticky bottom-0 bg-white pb-2">
             <button
               type="button"
-              onClick={() => onClose()}
+              onClick={handleCancel}
               className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
             >
               Annuler
@@ -424,6 +431,7 @@ export default function InputPersonneModal({
           </div>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 }

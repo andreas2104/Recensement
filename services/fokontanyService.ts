@@ -1,10 +1,10 @@
 import { Fokontany } from "@/types/fokontany";
 
-export const  fetchFokontany = async (): Promise<Fokontany[]> => {
+export const fetchFokontany = async (): Promise<Fokontany[]> => {
   try {
     const response = await fetch('/api/fokontany');
-    if(!response.ok) {
-      throw new Error (" Erreur lors de chargement des fokontany:")
+    if (!response.ok) {
+      throw new Error("Erreur lors de chargement des fokontany:");
     }
     return response.json();
   } catch (error) {
@@ -13,24 +13,24 @@ export const  fetchFokontany = async (): Promise<Fokontany[]> => {
   }
 };
 
-export const addFokontany = async (fokontany: Fokontany): Promise<{message: string; fokontany_id: number}> => {
- try {
-  const response = await fetch('/api/fokontany', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(fokontany),
-  });
-  if (!response.ok) {
-    // const errorData = await response.text();
-    throw new Error ('Erreur');
+
+export const addFokontany = async (fokontany: Fokontany): Promise<{ message: string; fokontany_id: number }> => {
+  try {
+    const response = await fetch('/api/fokontany', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fokontany),
+    });
+    if (!response.ok) {
+      throw new Error('Erreur');
+    }
+    return response.json();
+  } catch (error) {
+    console.error("erreur lors de la creation de fokontany", error);
+    throw error;
   }
-  return response.json();
- } catch (error) {
-  console.error("erreur lors de la creation de fokontany", error);
-  throw error;
- }
 };
 
 export const updateFokontany = async (fokontany: Fokontany): Promise<Fokontany> => {
@@ -40,16 +40,18 @@ export const updateFokontany = async (fokontany: Fokontany): Promise<Fokontany> 
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(fokontany),
+      body: JSON.stringify({
+        nom: fokontany.nom,
+        codeFokontany: fokontany.codeFokontany
+      }), 
     });
 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to update fokontany');
     }
-    const updatedFokontany = await response.json();
-    return updatedFokontany;
-
+    
+    return response.json();
   } catch (error) {
     console.error("Error updating fokontany:", error);
     throw error;
@@ -57,18 +59,24 @@ export const updateFokontany = async (fokontany: Fokontany): Promise<Fokontany> 
 };
 
 export const deleteFokontany = async (fokontanyId: number): Promise<void> => {
+  console.log('fokontanyId reçu:', fokontanyId, typeof fokontanyId);
+  
+  if (!fokontanyId || isNaN(fokontanyId)) {
+    throw new Error('ID Fokontany invalide ou manquant');
+  }
+  
   try {
     const response = await fetch(`/api/fokontany/${fokontanyId}`, {
       method: 'DELETE',
     });
-
+     
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to delete personne');
+      throw new Error(errorData.error || 'Failed to delete Fokontany');
     }
-    console.log(`Personne with ID ${fokontanyId} deleted successfully.`);
+    console.log(`Fokontany with ID ${fokontanyId} deleted successfully.`);
   } catch (error) {
-    console.error("Error deleting personne:", error);
+    console.error("Error deleting fokontany:", error);
     throw error;
   }
 };

@@ -1,24 +1,31 @@
-'use client'
+'use client';
 
-import { Personne } from "@/types/personne"
-import { useEffect, useState } from "react"
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-export default function NavPage() {
-  const {personne, setPersonne} = useState<Personne| null>(null); 
-  
-  useEffect(() => {
-    const getPersonne =async () => {
+export default function Nav() {
+  const pathname = usePathname();
 
-      
-    }
-  })
   return (
-    <>
-    <div className="min-h-screen  p-4 bg-gray-50">
-      <div className="text-gray-500">
-mnmnn
-      </div>
-    </div>
-    </>
-  )
+    <nav className="bg-gray-800 text-white p-4">
+      <ul className="flex space-x-4">
+        <li>
+          <Link
+            href="/"
+            className={`hover:text-gray-300 ${pathname === '/' ? 'font-bold' : ''}`}
+          >
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/fokontany"
+            className={`hover:text-gray-300 ${pathname === '/fokontany' ? 'font-bold' : ''}`}
+          >
+            Fokontany
+          </Link>
+        </li>
+      </ul>
+    </nav>
+  );
 }
