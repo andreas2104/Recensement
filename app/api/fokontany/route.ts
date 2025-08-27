@@ -1,8 +1,11 @@
+// /api/fokontany/route.ts
+
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
+// GET: Récupérer la liste de tous les fokontany
 export async function GET() {
   try {
     const fokontany = await prisma.fokontany.findMany({
@@ -10,18 +13,20 @@ export async function GET() {
         fokontanyId: true,
         nom: true,
         codeFokontany: true,
+        createdAt: true,
         _count: {
           select: {
-            personne: true, 
+            personne: true,
           },
         },
       },
     });
 
     const formattedData = fokontany.map((f) => ({
-      id: f.fokontanyId,
+      fokontanyId: f.fokontanyId,
       nom: f.nom,
       codeFokontany: f.codeFokontany,
+      createdAt: f.createdAt, 
       totalPersonnes: f._count.personne,
     }));
 
@@ -34,21 +39,30 @@ export async function GET() {
   }
 }
 
-export async  function POST(request: Request) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { codeFokontany, nom } = body;
 
+    if (!codeFokontany || !nom) {
+      return NextResponse.json({ error: "CodeFokontany and nom are required" }, { status: 400 });
+    }
+
     const newFokontany = await prisma.fokontany.create({
       data: {
         codeFokontany,
-        nom, 
+        nom,
       },
     });
-    return NextResponse.json(newFokontany);
-  } catch (error) {
-    console.error("Error creating fokontany:", error);
-    return NextResponse.json({ error: "Failed to create fokontany" }, { status: 500 }); 
-  }
-  }
 
+    return NextResponse.json(newFokontany, { status: 201 });
+  } catch (error: unknown) {
+    console.error("Error creating fokontany:", error);
+    
+    if (error instanceof Error && 'code' in error && error.code === 'P2002') {
+      return NextResponse.json({ error: 'CodeFokontany already exists' }, { status: 409 });
+    }
+    
+    return NextResponse.json({ error: "Failed to create fokontany" }, { status: 500 });
+  }
+}

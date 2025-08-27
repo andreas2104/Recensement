@@ -23,7 +23,6 @@ export const addPersonne = async (personne: Personne): Promise<{message: string;
     body: JSON.stringify(personne),
   });
   if (!response.ok) {
-    // const errorData = await response.text();
     throw new Error ('Erreur');
   }
   return response.json();
