@@ -1,7 +1,7 @@
-import PersonnesByFokontany from "../component/ui/PersonneByFokontany";
+import PersonneTable from "../component/ui/tablePersonne";
 
 export default function Personnes() {
   return (
-    <PersonnesByFokontany/>
+    <PersonneTable/>
   )
 }

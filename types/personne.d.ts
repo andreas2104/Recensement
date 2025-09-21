@@ -1,23 +1,23 @@
-import { Fokontany } from "@prisma/client";
+export type Statut = "ACTIF" | "DEMENAGER" | "DECEDE";
 
 export interface Personne {
   personneId: number;
   nom: string;
   prenom: string;
-  sexe: string;
-  dateNaissance: Date | string;
+  sexe: "M" | "F";
+  dateNaissance: string;
   lieuDeNaissance: string;
   CIN: string;
-  delivree: Date | string;
-  lieuDelivree: string;
-  asa: string;
-  nomPere: string;
-  nomMere: string;
-  fonenanaAnkehitriny: string;
-  fonenanaTaloha: string;
-  zompirenena: string;
+  dateDelivree: string;
+  lieuDelivrence: string;
+  profession: string;
+  nomPere?: string;
+  nomMere?: string;
+  adresseActuelle: string;
+  ancienneAdresse: string;
+  nationalite: string;
   contact: string;
-  createdAt: Date | string;
-  fokontanyId: number;
-  fokontany: Fokontany;
+  statut: Statut;
+  estElecteur: boolean;
+  createdAt: string;
 }

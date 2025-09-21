@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useFokontany } from "@/hooks/useFokontany";
-import { Fokontany } from "@/types/fokontany";
+import { useFokontany } from "@/hooks/useAdmi";
+import { Fokontany } from "@/types/admin";
 
 export default function FokontanyPage() {
   const { fokontany, isPending, error, addFokontany, updateFokontany, deleteFokontany } = useFokontany();
