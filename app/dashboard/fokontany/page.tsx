@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useFokontany } from "@/hooks/useFokontany";
-import { Fokontany } from "@/types/fokontany";
+import { useFokontany } from "@/hooks/useAdmi";
+import { Fokontany } from "@/types/admin";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function FokontanyPage() {

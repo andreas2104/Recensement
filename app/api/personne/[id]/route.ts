@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import { NextApiRequest } from "next";
+import { PrismaClient, Statut } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -8,206 +7,124 @@ interface Params {
   id: string;
 }
 
-export async function GET(request:NextApiRequest, { params }: {params: Params}) {
+// ✅ Récupérer une personne par ID
+export async function GET(_request: NextRequest, { params }: { params: Params }) {
   try {
-    const id = params.id;
-
-    if (!id) {
-      return NextResponse.json({ error: "Missing ID parameter" }, { status: 400 });
+    const id = parseInt(params.id, 10);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: "ID invalide" }, { status: 400 });
     }
 
     const personne = await prisma.personne.findUnique({
-      where: {
-        personneId: parseInt(id)
-      },
-      include: {
-        fokontany: {
-          select: {
-            nom: true,
-          },
-        },
-      },
+      where: { personneId: id },
     });
 
     if (!personne) {
-      return NextResponse.json({ error: "Personne not found" }, { status: 404 });
+      return NextResponse.json({ error: "Personne non trouvée" }, { status: 404 });
     }
 
-    const formatData = {
-      personneId: personne.personneId,
-      nom: personne.nom,
-      prenom: personne.prenom,
-      sexe: personne.sexe,
-      dateNaissance: personne.dateNaissance,
-      lieuDeNaissance: personne.lieuDeNaissance,
-      CIN: personne.CIN,
-      delivree: personne.delivree,
-      lieuDelivree: personne.lieuDelivree,
-      asa: personne.asa,
-      nomPere: personne.nomPere,
-      nomMere: personne.nomMere,
-      fonenanaAnkehitriny: personne.fonenanaAnkehitriny,
-      fonenanaTaloha: personne.fonenanaTaloha,
-      zompirenena: personne.zompirenena,
-      contact: personne.contact,
-      fokontany: {
-        nom: personne.fokontany?.nom || null,
-      },
-      createdAt: personne.createdAt
-    };
-
-    return NextResponse.json(formatData);
+    return NextResponse.json(personne);
   } catch (error) {
-    console.error("Error fetching personne by ID:", error);
-    return NextResponse.json({ error: "Failed to fetch personne" }, { status: 500 });
+    console.error("Erreur GET personne:", error);
+    return NextResponse.json({ error: "Échec de récupération de la personne" }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
 }
 
-export async function PUT(request: NextRequest, { params }: {params: Params}) {
+// ✅ Mettre à jour une personne
+export async function PUT(request: NextRequest, { params }: { params: Params }) {
   try {
-    const parsedId = parseInt(params.id, 10);
+    const id = parseInt(params.id, 10);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: "ID invalide" }, { status: 400 });
+    }
+
     const body = await request.json();
 
-    if (isNaN(parsedId)) {
-      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
-    }
-
+    // Validation minimale des champs requis
     const requiredFields = [
       "nom", "prenom", "sexe", "dateNaissance", "lieuDeNaissance",
-      "CIN", "delivree", "lieuDelivree", "asa", "nomPere", "nomMere",
-      "fonenanaAnkehitriny", "fonenanaTaloha", "zompirenena", "contact",
-      "nomFokontany",
+      "CIN", "dateDelivree", "lieuDelivrence", "profession",
+      "adresseActuelle", "ancienneAdresse", "nationalite", "contact", "statut"
     ];
-    const missingFields = requiredFields.filter((field) => !body[field]);
-    if (missingFields.length > 0) {
-      return NextResponse.json({ error: `Missing required fields: ${missingFields.join(", ")}` }, { status: 400 });
+    const missing = requiredFields.filter(f => !body[f]);
+    if (missing.length > 0) {
+      return NextResponse.json({ error: `Champs manquants : ${missing.join(", ")}` }, { status: 400 });
     }
 
-    const parsedDateNaissance = new Date(body.dateNaissance);
-    const parsedDelivree = new Date(body.delivree);
-    if (isNaN(parsedDateNaissance.getTime()) || isNaN(parsedDelivree.getTime())) {
-      return NextResponse.json({ error: "Invalid date format for dateNaissance or delivree" }, { status: 400 });
+    // Validation des dates
+    const dateNaissance = new Date(body.dateNaissance);
+    const dateDelivree = new Date(body.dateDelivree);
+    if (isNaN(dateNaissance.getTime()) || isNaN(dateDelivree.getTime())) {
+      return NextResponse.json({ error: "Format de date invalide" }, { status: 400 });
     }
+
+    // Validation du sexe
     if (!["M", "F"].includes(body.sexe)) {
-      return NextResponse.json({ error: "Invalid sexe value. Must be 'M' or 'F'" }, { status: 400 });
+      return NextResponse.json({ error: "Le sexe doit être 'M' ou 'F'" }, { status: 400 });
     }
 
-    const fokontany = await prisma.fokontany.findFirst({
-      where: { nom: body.nomFokontany },
-    });
-    if (!fokontany) {
-      return NextResponse.json({ error: `Fokontany with name '${body.nomFokontany}' not found.` }, { status: 404 });
+    // Validation du statut
+    if (!Object.values(Statut).includes(body.statut)) {
+      return NextResponse.json({ error: `Statut invalide. Doit être : ${Object.values(Statut).join(", ")}` }, { status: 400 });
     }
 
     const updatedPersonne = await prisma.personne.update({
-      where: { personneId: parsedId },
+      where: { personneId: id },
       data: {
         nom: body.nom,
         prenom: body.prenom,
         sexe: body.sexe,
-        dateNaissance: parsedDateNaissance,
+        dateNaissance,
         lieuDeNaissance: body.lieuDeNaissance,
         CIN: body.CIN,
-        delivree: parsedDelivree,
-        lieuDelivree: body.lieuDelivree,
-        asa: body.asa,
-        nomPere: body.nomPere,
-        nomMere: body.nomMere,
-        fonenanaAnkehitriny: body.fonenanaAnkehitriny,
-        fonenanaTaloha: body.fonenanaTaloha,
-        zompirenena: body.zompirenena,
+        dateDelivree,
+        lieuDelivrence: body.lieuDelivrence,
+        profession: body.profession,
+        nomPere: body.nomPere ?? null,
+        nomMere: body.nomMere ?? null,
+        adresseActuelle: body.adresseActuelle,
+        ancienneAdresse: body.ancienneAdresse,
+        nationalite: body.nationalite,
         contact: body.contact,
-        fokontanyId: fokontany.fokontanyId,
-      },
-      include: {
-        fokontany: {
-          select: { nom: true },
-        },
+        statut: body.statut,
+        estElecteur: body.estElecteur ?? false,
       },
     });
 
-  
-    const formatData = {
-      personneId: updatedPersonne.personneId,
-      nom: updatedPersonne.nom,
-      prenom: updatedPersonne.prenom,
-      sexe: updatedPersonne.sexe,
-      dateNaissance: updatedPersonne.dateNaissance,
-      lieuDeNaissance: updatedPersonne.lieuDeNaissance,
-      CIN: updatedPersonne.CIN,
-      delivree: updatedPersonne.delivree,
-      lieuDelivree: updatedPersonne.lieuDelivree,
-      asa: updatedPersonne.asa,
-      nomPere: updatedPersonne.nomPere,
-      nomMere: updatedPersonne.nomMere,
-      fonenanaAnkehitriny: updatedPersonne.fonenanaAnkehitriny,
-      fonenanaTaloha: updatedPersonne.fonenanaTaloha,
-      zompirenena: updatedPersonne.zompirenena,
-      contact: updatedPersonne.contact,
-      fokontany: {
-        nom: updatedPersonne.fokontany?.nom || null,
-      },
-      createdAt: updatedPersonne.createdAt
-    };
-
-    return NextResponse.json(formatData, { status: 200 });
+    return NextResponse.json(updatedPersonne, { status: 200 });
   } catch (error: any) {
-    if (error.code === 'P2025') {
-      return NextResponse.json({ error: "Personne not found" }, { status: 404 });
+    if (error.code === "P2025") {
+      return NextResponse.json({ error: "Personne non trouvée" }, { status: 404 });
     }
-    console.error("Error updating personne:", error, error?.message);
-    return NextResponse.json({ error: "Failed to update personne", details: error?.message }, { status: 500 });
+    console.error("Erreur PUT personne:", error);
+    return NextResponse.json({ error: "Échec de mise à jour", details: error.message }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
 }
 
-
-export async function DELETE(_request: NextApiRequest, { params }: {params:Params}) {
+// ✅ Supprimer une personne
+export async function DELETE(_request: NextRequest, { params }: { params: Params }) {
   try {
-    const parsedId = parseInt(params.id, 10);
-
-    if (isNaN(parsedId)) {
-      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
+    const id = parseInt(params.id, 10);
+    if (isNaN(id)) {
+      return NextResponse.json({ error: "ID invalide" }, { status: 400 });
     }
 
     await prisma.personne.delete({
-      where: { personneId: parsedId },
+      where: { personneId: id },
     });
 
-    return NextResponse.json({ message: "Personne successfully deleted" }, { status: 200 });
-  } catch (error) {
-    if (error.code === 'P2025') {
-      return NextResponse.json({ error: "Personne not found" }, { status: 404 });
+    return NextResponse.json({ message: "Personne supprimée avec succès" }, { status: 200 });
+  } catch (error: any) {
+    if (error.code === "P2025") {
+      return NextResponse.json({ error: "Personne non trouvée" }, { status: 404 });
     }
-    console.error("Error deleting personne:", error);
-    return NextResponse.json({ error: "Failed to delete personne" }, { status: 500 });
+    console.error("Erreur DELETE personne:", error);
+    return NextResponse.json({ error: "Échec de suppression" }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
-}
-
-export async function GetpersonneByFokontany(CIN: string, nom: string, fokontanyId: number) {
-  const personnes = await prisma.personne.findMany({
-    where: {
-      fokontanyId: fokontanyId,
-      CIN: {
-        contains: CIN,
-      },
-      nom: {
-        contains: nom,
-      },
-    },
-    include: {
-      fokontany: {
-        select: {
-          nom: true,
-          codeFokontany: true, 
-        },
-      },
-    },
-  });
-  return personnes;
 }

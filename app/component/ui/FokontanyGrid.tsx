@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useFokontany } from '@/hooks/useFokontany';
+import { useFokontany } from '@/hooks/useAdmi';
 import Link from 'next/link';
-import { Fokontany } from '@/types/fokontany';
+import { Fokontany } from '@/types/admin';
 import InputPersonneModal from './inputPersonne'; 
 
 const FokontanyGrid: React.FC = () => {

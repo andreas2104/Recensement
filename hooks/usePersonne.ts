@@ -1,92 +1,46 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Personne } from "@/types/personne";
-import { addPersonne,deletePersonne,updatePersonne ,fetchPersonnes,getPersonneById, getPersonneByFokontany} from "@/services/personneService";
-
+import { addPersonne, deletePersonne, updatePersonne, fetchPersonnes } from "@/services/personneService";
 
 export const usePersonne = () => {
   const queryClient = useQueryClient();
 
- const {data: personne = [], isPending,error } = useQuery({
-  queryKey: ['personne'],
-  queryFn: fetchPersonnes,
-  refetchOnWindowFocus: false,
- });
-
- const addMutation = useMutation({
-  mutationFn: (personne: Personne) => addPersonne(personne),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['personne']});
-  }
- });
-
-const updateMutation = useMutation({
-  mutationFn: (personne: Personne) => updatePersonne(personne),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['personne']})
-  }
-});
-
-const deleteMutation = useMutation({
-  mutationFn: (id: number) => deletePersonne(id),
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['personne']});
-  }
-});
-
-return {
-  personne,
-  isPending,
-  error,
-  addPersonne:addMutation.mutate,
-  updatePersonne: updateMutation.mutate,
-  deletePersonne: deleteMutation.mutate
-}
-}
-export const usePersonneById = (personneId: number | null) => {
-  const { data, isPending, error } = useQuery({
-    queryKey: ['personne', personneId],
-    queryFn: () => {
-      if (personneId === null) {
-        return Promise.resolve(null);
-      }
-      return getPersonneById(personneId);
-    },
-    enabled: personneId !== null,
+  const { data, isLoading: isPending, error } = useQuery<Personne[]>({
+    queryKey: ['personne'],
+    queryFn: fetchPersonnes,
     refetchOnWindowFocus: false,
   });
 
-  return {
-    personne: data as Personne | null,
-    isPending,
-    error,
-  };
-};
 
-export const usePersonneByFokontany = (fokontanyId: number | null) => {
-  const isValidId = typeof fokontanyId === 'number' && !isNaN(fokontanyId);
-  const { data, isPending, error } = useQuery({
-    queryKey: ['personne', fokontanyId],
-    queryFn: async () => {
-      if (!isValidId) {
-        return [];
-      }
-      try {
-        return await getPersonneByFokontany(fokontanyId as number);
-      } catch (err: unknown) {
-        if (err instanceof Error && err.message === "Le fokontany demandé n'existe pas.") {
-          throw new Error("Le fokontany demandé n'existe pas.");
-        }
-        throw err;
-      }
+  const addMutation = useMutation({
+    mutationFn: (personne: Omit<Personne, "personneId" | "createdAt">) => addPersonne(personne),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['personne'] });
     },
-    enabled: isValidId,
-    refetchOnWindowFocus: false,
+  });
+
+
+  const updateMutation = useMutation({
+    mutationFn: (personne: Personne) => updatePersonne(personne),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['personne'] });
+    },
+  });
+
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deletePersonne(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['personne'] });
+    },
   });
 
   return {
-    personnes: data as Personne[] | [],
+    personne: data ?? [],
     isPending,
     error,
-    fokontanyNotFound: error?.message === "Le fokontany demandé n'existe pas." ? true : false,
+    addPersonne: addMutation.mutate,
+    updatePersonne: updateMutation.mutate,
+    deletePersonne: deleteMutation.mutate,
   };
 };
