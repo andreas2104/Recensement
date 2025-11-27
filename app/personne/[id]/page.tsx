@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import AfficherPersonneDetails from '@/app/component/ui/afficherPersonneDetails'
+import AfficherPersonneDetails from '@/app/components/ui/afficherPersonneDetails'
 
 export default function PersonneDetailsPage() {
   const { id } = useParams();

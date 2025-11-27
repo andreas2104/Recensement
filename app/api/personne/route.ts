@@ -1,5 +1,5 @@
 import { PrismaClient, Statut } from "@prisma/client";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,6 @@ const handleError = (error: any, message: string, status: number = 500) => {
   return NextResponse.json({ error: message, details: error.message }, { status });
 };
 
-// ✅ Récupérer toutes les personnes
 export async function GET() {
   try {
     const personnes = await prisma.personne.findMany();
@@ -20,7 +19,8 @@ export async function GET() {
   }
 }
 
-export async function POST(request: NextRequest) {
+
+export async function POST(request: Request) {
   try {
     const body = await request.json();
 
@@ -44,60 +44,68 @@ export async function POST(request: NextRequest) {
       estElecteur = false,
     } = body;
 
-    // Vérification des champs obligatoires
+    // Champs obligatoires
     const requiredFields = [
       "nom", "prenom", "sexe", "dateNaissance", "lieuDeNaissance",
       "CIN", "dateDelivree", "lieuDelivrence", "profession",
       "adresseActuelle", "ancienneAdresse", "nationalite", "contact"
     ];
-    const missingFields = requiredFields.filter(f => !body[f]);
-    if (missingFields.length > 0) {
-      return handleError(
-        new Error("Champs manquants"),
-        `Champs requis manquants : ${missingFields.join(", ")}`,
-        400
+    
+    const missing = requiredFields.filter(f => !body[f]);
+
+    if (missing.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Champs manquants",
+          details: `Champs requis manquants : ${missing.join(", ")}`,
+        },
+        { status: 400 }
       );
     }
 
-    // Validation des dates
-    const parsedDateNaissance = new Date(dateNaissance);
-    const parsedDateDelivree = new Date(dateDelivree);
-    if (isNaN(parsedDateNaissance.getTime()) || isNaN(parsedDateDelivree.getTime())) {
-      return handleError(
-        new Error("Format de date invalide"),
-        "Format de date invalide pour dateNaissance ou dateDelivree",
-        400
+    // Validation dates
+    const dNaiss = new Date(dateNaissance);
+    const dDelivr = new Date(dateDelivree);
+
+    if (isNaN(dNaiss.getTime()) || isNaN(dDelivr.getTime())) {
+      return NextResponse.json(
+        {
+          error: "Format de date invalide",
+          details: "dateNaissance ou dateDelivree n'est pas une date valide",
+        },
+        { status: 400 }
       );
     }
 
     // Validation sexe
     if (!["M", "F"].includes(sexe)) {
-      return handleError(
-        new Error("Sexe invalide"),
-        "Le sexe doit être 'M' ou 'F'",
-        400
+      return NextResponse.json(
+        { error: "Sexe invalide", details: "Le sexe doit être 'M' ou 'F'" },
+        { status: 400 }
       );
     }
 
     // Validation statut
-    if (!Object.values(Statut).includes(statut as Statut)) {
-      return handleError(
-        new Error("Statut invalide"),
-        `Statut invalide. Doit être : ${Object.values(Statut).join(", ")}`,
-        400
+    if (!Object.values(Statut).includes(statut)) {
+      return NextResponse.json(
+        {
+          error: "Statut invalide",
+          details: `Statut doit être : ${Object.values(Statut).join(", ")}`,
+        },
+        { status: 400 }
       );
     }
 
-    // Création de la personne
+    // Création en base
     const newPersonne = await prisma.personne.create({
       data: {
         nom,
         prenom,
         sexe,
-        dateNaissance: parsedDateNaissance,
+        dateNaissance: dNaiss,
         lieuDeNaissance,
         CIN,
-        dateDelivree: parsedDateDelivree,
+        dateDelivree: dDelivr,
         lieuDelivrence,
         profession,
         nomPere: nomPere ?? null,
@@ -111,10 +119,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(newPersonne, { status: 201 });
+    return NextResponse.json(
+      {
+        message: "Personne créée avec succès",
+        data: newPersonne,
+      },
+      { status: 201 }
+    );
+
   } catch (error: any) {
-    return handleError(error, "Échec de création de la personne");
-  } finally {
-    await prisma.$disconnect();
+    return NextResponse.json(
+      {
+        error: "Échec de création de la personne",
+        details: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

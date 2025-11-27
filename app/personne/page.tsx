@@ -1,4 +1,4 @@
-import PersonneTable from "../component/ui/tablePersonne";
+import PersonneTable from "../components/ui/tablePersonne";
 
 export default function Personnes() {
   return (
