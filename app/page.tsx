@@ -1,6 +1,6 @@
 // import PersonnePage from "./dashboard/personne/page";
 
-import FokontanyGrid from "./component/ui/FokontanyGrid";
+import FokontanyGrid from "./components/ui/FokontanyGrid";
 
 export default function Home() {
   return (

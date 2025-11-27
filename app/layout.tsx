@@ -5,8 +5,8 @@ import './globals.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Inter } from 'next/font/google';
-import Nav from './component/NavBar';
-import Header from './component/Header';
+import Nav from './components/NavBar';
+import Header from './components/Header';
 
 const inter = Inter({ subsets: ['latin'] });
 
