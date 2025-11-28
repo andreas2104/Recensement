@@ -67,7 +67,7 @@ model VerificationToken {
 }
 
 
-enum Statut {
+enum Status {
   ACTIF // encore dans le fokontany
   DEMENAGER // a déménagé ailleurs
   DECEDE // décès
@@ -77,28 +77,31 @@ enum Situation {
   DIVORCE
   VEUF
 }
-model Personne {
-  personneId      Int      @id @default(autoincrement())
-  nom             String
-  prenom          String
-  sexe            String
-  dateNaissance   DateTime
-  lieuDeNaissance String
-  CIN             String   @unique
-  dateDelivree    DateTime
-  lieuDelivrence  String
+model Person {
+  personId        Int       @id @default(autoincrement())
+  firstName       String
+  lastName        String
+  gender          String
+  birthDate       DateTime
+  birthPlace      String
+  nationalId      String    @unique   // CIN
+  issuedDate      DateTime
+  issuedPlace     String
   profession      String
-  nomPere         String?
-  nomMere         String?
-  adresseActuelle String
-  ancienneAdresse String
-  nationalite     String
-  contact         String
-  situation Situation @default(CELIBATAIRE)
-  // Champs ajoutés
-  statut      Statut  @default(ACTIF)
-  estElecteur Boolean @default(false)
+  fatherName      String?
+  motherName      String?
+  currentAddress  String
+  previousAddress String
+  nationality     String
+  phone           String
+  maritalStatus   Situation @default(CELIBATAIRE)
+  
+  // Added fields
+  status          Status    @default(ACTIF)
+  isVoter         Boolean   @default(false)
 
-  createdAt DateTime @default(now())
+  createdAt       DateTime  @default(now())
 }
+
+
 
