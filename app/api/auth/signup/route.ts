@@ -7,25 +7,32 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const parsed = SignupFormSchema.safeParse(body);
+
     if (!parsed.success) {
       return Response.json(
         {
+          message: "Validation failed",
           errors: parsed.error.flatten().fieldErrors,
         },
-        {status: 400}
+        { status: 400 }
       );
     }
-    
-    const {name, email, password, phone} = parsed.data;
+
+    const { name, email, password, phone } = parsed.data;
 
     const existingUser = await prisma.user.findUnique({
-      where: {email},
+      where: { email },
     });
 
     if (existingUser) {
       return Response.json(
-        {message: "Email already exist"},
-        {status: 400 }
+        {
+          message: "Email already exists",
+          errors: {
+            email: ["This email is already registered"],
+          },
+        },
+        { status: 400 }
       );
     }
 
@@ -41,12 +48,11 @@ export async function POST(req: Request) {
     });
 
     return Response.json(
-      {message: 'Account created successfully'},
-      { status: 201}
+      { message: "Account created successfully" },
+      { status: 201 }
     );
-  } catch {
-    return Response.json(
-      {message: "Server Error"}
-    );
+  } catch (error) {
+    console.error("Server error:", error);
+    return Response.json({ message: "Server Error" }, { status: 500 });
   }
 }
