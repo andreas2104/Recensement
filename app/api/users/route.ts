@@ -4,8 +4,9 @@ import prisma from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   try {
     const role = req.headers.get("x-user-role");
+    const userId = req.headers.get("x-user-id");
 
-    if (role !== "ADMIN") {
+    if (role !== "ADMIN" || !userId) {
       return NextResponse.json(
         { error: "Forbidden: Admin only" },
         { status: 403 }
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
         email: true,
         role: true,
         createdAt: true,
-      }
+      },
     });
 
     return NextResponse.json(users);

@@ -24,6 +24,7 @@ const login = async (data: LoginFormData) => {
   const response = await fetch(`/api/auth/login`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
+    credentials: 'include', // ✅ Ajouté pour les cookies
     body: JSON.stringify(data), 
   });
 
@@ -49,7 +50,6 @@ export default function LoginPage() {
     const { name, value } = e.target;
     setFormData({...formData, [name]: value});
     
-    // Effacer l'erreur du champ quand l'utilisateur commence à taper
     if (validationErrors[name as keyof ValidationErrors]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -57,7 +57,6 @@ export default function LoginPage() {
       }));
     }
     
-    // Effacer l'erreur globale
     if (globalError) {
       setGlobalError("");
     }
@@ -66,24 +65,29 @@ export default function LoginPage() {
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: () => {
+      console.log("✅ Login successful, invalidating user query");
+      
+      // ✅ Invalider la query avec la bonne clé
       queryClient.invalidateQueries({queryKey: ["user"]});
+      
       setValidationErrors({});
       setGlobalError("");
-      alert("Login successful! Redirecting...");
+      
+      // ✅ Optionnel : précharger les données utilisateur
+      queryClient.refetchQueries({queryKey: ["user"]});
+      
       startTransition(() => {
-        router.push('/');
+        router.push('/person');
       });
     },
     onError: (error: ApiError) => {
-      // Réinitialiser les erreurs précédentes
+      console.error("❌ Login error:", error);
       setValidationErrors({});
       setGlobalError("");
       
       if (error.errors) {
-        // Afficher les erreurs de validation par champ
         setValidationErrors(error.errors);
       } else if (error.message) {
-        // Afficher l'erreur globale
         setGlobalError(error.message);
       } else {
         setGlobalError("An unknown error occurred");
@@ -96,7 +100,6 @@ export default function LoginPage() {
     setValidationErrors({});
     setGlobalError("");
     
-    // Validation simple
     if (!formData.email || !formData.password) {
       setGlobalError("Please fill in all required fields");
       return;
@@ -108,21 +111,19 @@ export default function LoginPage() {
   const isLoading = mutation.isPending || isPending;
 
   return (
-    <div className="flex items-center justify-center min-h-screen ">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <form 
         onSubmit={handleSubmit}
         className="shadow-lg bg-white rounded-xl p-8 w-full max-w-md"
       >
         <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
         
-        {/* Message d'erreur global */}
         {globalError && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
             {globalError}
           </div>
         )}
         
-        {/* Champ Email */}
         <div className="mb-4">
           <input 
             type="email"
@@ -144,7 +145,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Champ Password */}
         <div className="mb-6">
           <input 
             type="password"
@@ -174,7 +174,6 @@ export default function LoginPage() {
           {isLoading ? "Signing in..." : "Sign In"}
         </button>
 
-        {/* Lien vers la page d'inscription */}
         <div className="text-center">
           <p className="text-gray-600">
             Don't have an account?{" "}
@@ -185,7 +184,9 @@ export default function LoginPage() {
               Sign up
             </Link>
           </p>
-          <p className="text-red-500 text-sm">Forgot password ?</p>
+          <Link href="/forgot-password" className="text-red-500 text-sm hover:text-red-600">
+            Forgot password?
+          </Link>
         </div>
       </form>
     </div>

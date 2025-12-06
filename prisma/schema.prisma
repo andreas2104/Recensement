@@ -84,9 +84,9 @@ model Person {
   gender          String
   birthDate       DateTime
   birthPlace      String
-  nationalId      String    @unique   // CIN
-  issuedDate      DateTime
-  issuedPlace     String
+  nationalId      String?    @unique   // CIN
+  issuedDate      DateTime?
+  issuedPlace     String?
   profession      String
   fatherName      String?
   motherName      String?
