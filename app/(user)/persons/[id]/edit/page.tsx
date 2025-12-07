@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCreatePerson } from '@/hooks/usePersons';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { usePerson, useUpdatePerson } from '@/hooks/usePersons';
 
-export default function CreatePersonPage() {
+export default function UpdatePersonPage() {
   const router = useRouter();
-  const createPersonMutation = useCreatePerson();
+  const params = useParams();
+  const id = params.id as string;
+  
+  const { data: person, isLoading, error } = usePerson(id);
+  const updatePersonMutation = useUpdatePerson();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -15,9 +19,9 @@ export default function CreatePersonPage() {
     birthDate: '',
     birthPlace: '',
     nationality: 'Malagasy',
-    nationalId: '', // Optionnel maintenant
-    issuedDate: '', // Note: changé de "issueDate" à "issuedDate"
-    issuedPlace: '', // Note: changé de "issuePlace" à "issuedPlace"
+    nationalId: '',
+    issuedDate: '', 
+    issuedPlace: '', 
     profession: '',
     phone: '',
     fatherName: '',
@@ -29,7 +33,45 @@ export default function CreatePersonPage() {
     isVoter: false,
   });
 
-  const [showCinFields, setShowCinFields] = useState(false); // Pour gérer l'affichage des champs CIN
+  const [showCinFields, setShowCinFields] = useState(false);
+
+  // ✅ Fonction pour formater les dates ISO en format YYYY-MM-DD
+  const formatDateForInput = (isoDate: string | null | undefined): string => {
+    if (!isoDate) return '';
+    try {
+      const date = new Date(isoDate);
+      return date.toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  };
+
+  // ✅ Remplir le formulaire une seule fois quand person change
+  useEffect(() => {
+    if (person) {
+      setFormData({
+        firstName: person.firstName || '',
+        lastName: person.lastName || '',
+        gender: person.gender || 'M',
+        birthDate: formatDateForInput(person.birthDate),
+        birthPlace: person.birthPlace || '',
+        nationality: person.nationality || 'Malagasy',
+        nationalId: person.nationalId || '',
+        issuedDate: formatDateForInput(person.issuedDate),
+        issuedPlace: person.issuedPlace || '',
+        profession: person.profession || '',
+        phone: person.phone || '',
+        fatherName: person.fatherName || '',
+        motherName: person.motherName || '',
+        currentAddress: person.currentAddress || '',
+        previousAddress: person.previousAddress || '',
+        maritalStatus: person.maritalStatus || 'CELIBATAIRE',
+        status: person.status || 'ACTIF',
+        isVoter: person.isVoter || false,
+      });
+      setShowCinFields(!!person.nationalId);
+    }
+  }, [person]); // ✅ Dépend uniquement de person
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -48,13 +90,13 @@ export default function CreatePersonPage() {
     // Préparer les données pour l'API
     const submitData: any = { ...formData };
     
-    // Si pas de CIN, on retire les champs CIN
+    // Gestion des champs CIN
     if (!showCinFields || !submitData.nationalId) {
       delete submitData.nationalId;
       delete submitData.issuedDate;
       delete submitData.issuedPlace;
     } else {
-      // Si CIN fourni, s'assurer que les dates sont au bon format
+      // Si CIN fourni, formater la date
       if (submitData.issuedDate) {
         submitData.issuedDate = new Date(submitData.issuedDate).toISOString();
       }
@@ -65,22 +107,90 @@ export default function CreatePersonPage() {
       submitData.birthDate = new Date(submitData.birthDate).toISOString();
     }
     
+    // Supprimer les champs vides pour un PATCH propre
+    Object.keys(submitData).forEach(key => {
+      if (submitData[key] === '' || submitData[key] === null) {
+        delete submitData[key];
+      }
+    });
+    
     try {
-      await createPersonMutation.mutateAsync(submitData);
-      router.push('/persons');
+      await updatePersonMutation.mutateAsync({ id, data: submitData });
+      router.push(`/persons/${id}`);
     } catch (error) {
-      console.error('Error creating person:', error);
+      console.error('Error updating person:', error);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement des données...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h2 className="text-xl font-bold text-red-700 mb-2">Erreur</h2>
+          <p className="text-red-600">{error.message || 'Impossible de charger les données de la personne'}</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-4 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          >
+            Retour
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!person) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h2 className="text-xl font-bold text-yellow-700 mb-2">Personne non trouvée</h2>
+          <p className="text-yellow-600">La personne que vous essayez de modifier n'existe pas.</p>
+          <button
+            onClick={() => router.push('/persons')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retour à la liste
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Créer une Nouvelle Personne</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Modifier la Personne</h1>
         <p className="text-gray-600 mt-2">
-          Remplissez le formulaire ci-dessous pour ajouter une nouvelle personne au registre.
+          Modifiez les informations de {person.firstName} {person.lastName}.
           Les champs marqués d'un * sont obligatoires.
         </p>
+        <div className="mt-4 flex items-center space-x-4">
+          <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+            person.status === 'ACTIF' 
+              ? 'bg-green-100 text-green-800'
+              : person.status === 'DEMENAGER'
+              ? 'bg-yellow-100 text-yellow-800'
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {person.status}
+          </span>
+          {person.isVoter && (
+            <span className="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-800">
+              Électeur
+            </span>
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
@@ -428,30 +538,51 @@ export default function CreatePersonPage() {
         </div>
 
         {/* Boutons d'action */}
-        <div className="flex justify-end space-x-4 pt-6 border-t">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            disabled={createPersonMutation.isPending}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            Annuler
-          </button>
+        <div className="flex justify-between pt-6 border-t">
+          <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={() => router.push(`/persons/${id}`)}
+              disabled={updatePersonMutation.isPending}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              Voir les détails
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push('/persons')}
+              disabled={updatePersonMutation.isPending}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              Retour à la liste
+            </button>
+          </div>
           
-          <button
-            type="submit"
-            disabled={createPersonMutation.isPending}
-            className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {createPersonMutation.isPending ? 'Création...' : 'Créer la personne'}
-          </button>
+          <div className="flex space-x-4">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              disabled={updatePersonMutation.isPending}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              Annuler
+            </button>
+            
+            <button
+              type="submit"
+              disabled={updatePersonMutation.isPending}
+              className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {updatePersonMutation.isPending ? 'Mise à jour...' : 'Mettre à jour'}
+            </button>
+          </div>
         </div>
       </form>
 
-      {createPersonMutation.error && (
+      {updatePersonMutation.error && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-700">
-            Erreur : {createPersonMutation.error.message}
+            Erreur : {updatePersonMutation.error.message}
           </p>
         </div>
       )}

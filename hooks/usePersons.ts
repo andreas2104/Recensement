@@ -139,18 +139,18 @@ const updatePerson = async ({
   id: string;
   data: Partial<PersonneFormData>;
 }) => {
-  console.log("✏️ Updating person:", id, data);
+  console.log(" Updating person:", id, data);
 
   const response = await fetch(`/api/persons/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include",
+    // credentials: "include",
     body: JSON.stringify(data),
   });
 
-  console.log("📡 PATCH /api/persons/[id] - Status:", response.status);
+  console.log("PATCH /api/persons/[id] - Status:", response.status);
 
   const result = await response.json();
 
@@ -159,7 +159,7 @@ const updatePerson = async ({
     throw new Error(result.error || "Erreur lors de la mise à jour");
   }
 
-  console.log("✅ Person updated:", result);
+  console.log(" Person updated:", result);
   return result;
 };
 
@@ -169,13 +169,13 @@ export const useUpdatePerson = () => {
   return useMutation({
     mutationFn: updatePerson,
     onSuccess: (data, variables) => {
-      console.log("✅ Update successful");
+      console.log(" Update successful");
       toast.success("Personne mise à jour avec succès");
       queryClient.invalidateQueries({ queryKey: ["persons"] });
       queryClient.invalidateQueries({ queryKey: ["persons", variables.id] });
     },
     onError: (error: Error) => {
-      console.error("❌ Update error:", error);
+      console.error(" Update error:", error);
       toast.error(error.message || "Échec de la mise à jour");
     },
   });
@@ -183,23 +183,23 @@ export const useUpdatePerson = () => {
 
 /* ==================== DELETE PERSON ==================== */
 const deletePerson = async (id: string) => {
-  console.log("🗑️ Deleting person:", id);
+  console.log(" Deleting person:", id);
 
   const response = await fetch(`/api/persons/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
 
-  console.log("📡 DELETE /api/persons/[id] - Status:", response.status);
+  console.log("DELETE /api/persons/[id] - Status:", response.status);
 
   const result = await response.json();
 
   if (!response.ok) {
-    console.error("❌ Error deleting person:", result);
+    console.error(" Error deleting person:", result);
     throw new Error(result.error || "Erreur lors de la suppression");
   }
 
-  console.log("✅ Person deleted");
+  console.log("Person deleted");
   return result;
 };
 
@@ -209,12 +209,12 @@ export const useDeletePerson = () => {
   return useMutation({
     mutationFn: deletePerson,
     onSuccess: () => {
-      console.log("✅ Delete successful");
+      console.log(" Delete successful");
       toast.success("Personne supprimée avec succès");
       queryClient.invalidateQueries({ queryKey: ["persons"] });
     },
     onError: (error: Error) => {
-      console.error("❌ Delete error:", error);
+      console.error("Delete error:", error);
       toast.error(error.message || "Échec de la suppression");
     },
   });

@@ -28,7 +28,7 @@ export default function PersonList() {
         <div className="text-center">
           <p className="text-red-500 text-lg mb-4">Non authentifié</p>
           <button
-            onClick={() => router.push('/login')}
+            onClick={() => router.push('/connexion')}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Se connecter
@@ -38,7 +38,7 @@ export default function PersonList() {
     );
   }
 
-  // ✅ Erreur de chargement des personnes
+  // Erreur de chargement des personnes
   if (personsError) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -49,7 +49,7 @@ export default function PersonList() {
     );
   }
 
-  // ✅ Liste vide
+  //  Liste vide
   if (!persons || persons.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -91,6 +91,9 @@ export default function PersonList() {
     <div className="container mx-auto px-4 py-8">
       {/* Header avec info utilisateur */}
       <div className="mb-6 flex items-center justify-between">
+        <button
+        onClick={() => router.push('/isvoter')}
+        className='px-4 py-2  bg-green-500 text-white rounded hover:bg-green-700 transition flex items-center gap-2'>Liste electoral</button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Liste des Personnes</h1>
           <p className="text-sm text-gray-500 mt-1">

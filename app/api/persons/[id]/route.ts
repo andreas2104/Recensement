@@ -3,10 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id, 10);
+    const { id: paramsId } = await params;
+    const id = parseInt(paramsId, 10);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -48,12 +49,13 @@ export async function GET(
   }
 }
 
-export async function PUT(
+export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id, 10);
+    const { id: paramsId } = await params;
+    const id = parseInt(paramsId, 10);
 
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID invalide" }, { status: 400 });
@@ -109,10 +111,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id, 10);
+    const { id: paramsId } = await params;
+    const id = parseInt(paramsId, 10);
 
     if (isNaN(id)) {
       return NextResponse.json({ error: "ID invalide" }, { status: 400 });
