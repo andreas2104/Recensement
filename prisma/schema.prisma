@@ -73,7 +73,8 @@ enum Status {
   DECEDE // décès
 }
 enum Situation {
-  CELIBATAIRE
+  CELIBATAIRE //add Marié, Divorcé, Veuf
+  MARIE
   DIVORCE
   VEUF
 }
@@ -84,9 +85,9 @@ model Person {
   gender          String
   birthDate       DateTime
   birthPlace      String
-  nationalId      String    @unique   // CIN
-  issuedDate      DateTime
-  issuedPlace     String
+  nationalId      String?    @unique   // CIN
+  issuedDate      DateTime?
+  issuedPlace     String?
   profession      String
   fatherName      String?
   motherName      String?

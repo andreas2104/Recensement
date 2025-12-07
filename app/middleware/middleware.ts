@@ -1,50 +1,91 @@
-import { NextResponse, NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
+// import { NextRequest, NextResponse } from "next/server";
+// import jwt from "jsonwebtoken";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
+// interface JwtPayload {
+//   userId: number;
+//   email: string;
+//   role: string;
+// }
 
-  // 1. Aucun token → redirect
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
+// export function middleware(req: NextRequest) {
+//   const pathname = req.nextUrl.pathname;
+//   console.log("🔒 Middleware executing for:", pathname);
 
-  try {
-    // 2. Vérifier le token
-    interface JwtPayload {
-      userId: string | number;
-      role: string;
-      [key: string]: unknown;
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+//   // ✅ Ne pas bloquer les routes d'authentification
+//   if (
+//     pathname.startsWith("/api/auth/login") ||
+//     pathname.startsWith("/api/auth/register")
+//   ) {
+//     console.log("⚪ Auth route, skipping middleware");
+//     return NextResponse.next();
+//   }
 
-    // 3. Ajouter les infos user dans les headers
-    const requestHeaders = new Headers(req.headers);
+//   // Récupérer le token depuis les cookies
+//   const token = req.cookies.get("token")?.value;
+//   console.log("🍪 Token found:", token ? "Yes" : "No");
 
-    if (typeof decoded === "object" && decoded !== null) {
-      requestHeaders.set("x-user-id", String(decoded.userId));
-      requestHeaders.set("x-user-role", String(decoded.role));
-    }
+//   // Si pas de token sur une route protégée
+//   if (!token) {
+//     console.log("❌ No token, returning 401");
+//     return NextResponse.json(
+//       { error: "Unauthorized - No token" },
+//       { status: 401 }
+//     );
+//   }
 
-    //protected page
+//   try {
+//     // Vérifier et décoder le token
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+//     console.log("✅ Token decoded:", {
+//       userId: decoded.userId,
+//       role: decoded.role,
+//       email: decoded.email,
+//     });
 
-    if (req.nextUrl.pathname.startsWith("/admin")) {
-      if (decoded.role !== "ADMIN") {
-        return NextResponse.redirect(new URL("/unauthorized", req.url));
-      }
-    }
+//     // Créer une nouvelle réponse avec les headers d'authentification
+//     const requestHeaders = new Headers(req.headers);
+//     requestHeaders.set("x-user-id", decoded.userId.toString());
+//     requestHeaders.set("x-user-role", decoded.role);
 
-    // 4. Continuer la requête
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  } catch {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-}
+//     console.log("✅ Added auth headers:", {
+//       "x-user-id": decoded.userId,
+//       "x-user-role": decoded.role,
+//     });
 
-export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/person/:path*"],
-};
+//     // Continuer avec les headers modifiés
+//     return NextResponse.next({
+//       request: {
+//         headers: requestHeaders,
+//       },
+//     });
+//   } catch (error) {
+//     console.error("❌ JWT verification failed:", error);
+
+//     // Token expiré ou invalide
+//     const response = NextResponse.json(
+//       { error: "Unauthorized - Invalid or expired token" },
+//       { status: 401 }
+//     );
+
+//     // Supprimer le cookie invalide
+//     response.cookies.delete("token");
+
+//     return response;
+//   }
+// }
+
+// // Configurer les routes à protéger
+// export const config = {
+//   matcher: [
+//     // ✅ Protéger toutes les routes API sauf login/register
+//     "/api/:path*",
+//     "/api/auth/me",
+//     "/api/persons", // ← Pour /api/persons
+//     "/api/persons/:path*", // ← Pour /api/persons/123
+//     "/api/users",
+//     "/api/users/:path*",
+//     // Ajoutez d'autres routes API à protéger
+//     // "/api/documents",
+//     // "/api/documents/:path*",
+//   ],
+// };

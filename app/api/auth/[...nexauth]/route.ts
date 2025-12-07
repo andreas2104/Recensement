@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -17,7 +17,8 @@ declare module "next-auth" {
   }
 }
 
-const handler = NextAuth({
+// Export authOptions pour pouvoir l'utiliser ailleurs
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -68,12 +69,13 @@ const handler = NextAuth({
         if (!session.user) {
           session.user = {};
         }
-        session.user.userId = token.userId;
-        session.user.role = token.role;
+        session.user.userId = token.userId as string;
+        session.user.role = token.role as string;
       }
       return session;
     },
   },
-});
+};
 
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

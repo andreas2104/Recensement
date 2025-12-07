@@ -1,6 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 
-/* ----------------------------- GET COOKIE ----------------------------- */
+/* -----fafaina rehefa mety tsara ny usecurrentuser------------------------ GET COOKIE ----------------------------- */
 const getCookie = (name: string): string | null => {
   if (typeof document === "undefined") return null;
 

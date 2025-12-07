@@ -1,7 +1,7 @@
 import { PropsWithChildren } from "react";
 
-enum EncType {
-  UrlEncoded = "application/x-www-form-urlEncoded",
+export  enum EncType {
+  UrlEncoded = "application/x-www-form-urlencoded",
   Multipart = "multipart/form-data"
 }
 
