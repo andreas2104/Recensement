@@ -101,8 +101,28 @@ model Person {
   status          Status    @default(ACTIF)
   isVoter         Boolean   @default(false)
 
+  // Relations
+  taxes           Tax[]
+
   createdAt       DateTime  @default(now())
 }
 
+model Tax {
+  taxId       Int      @id @default(autoincrement())
+  personId    Int
+  year        Int
+  amount      Float    // Montant de la taxe
+  paidAmount  Float    @default(0) // Montant payé
+  isPaid      Boolean  @default(false)
+  paidAt      DateTime?
+  dueDate     DateTime?
+  description String?  // Type de taxe (ex: "Impôt foncier", "Taxe communale")
+  
+  person      Person   @relation(fields: [personId], references: [personId], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-
+  @@unique([personId, year, description])
+  @@index([year])
+  @@index([isPaid])
+}
