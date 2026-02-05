@@ -1,15 +1,41 @@
 'use client'
 
+import { useMemo } from 'react';
 import { usePersons } from '@/hooks/usePersons';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useRouter } from 'next/navigation';
+import { useSearch } from '@/app/context/searchContext';
 
 export default function PersonList() {
   const router = useRouter();
+  const { searchQuery } = useSearch();
 
   // Récupérer l'utilisateur connecté
   const { data: user, isLoading: userLoading, error: userError } = useCurrentUser();
   const { data: persons, isLoading: personsLoading, error: personsError } = usePersons();
+
+  // Filter persons based on global search query
+  const filteredPersons = useMemo(() => {
+    if (!persons) return [];
+    if (!searchQuery.trim()) return persons;
+    
+    const query = searchQuery.toLowerCase();
+    return persons.filter((person) => {
+      const fullName = `${person.firstName} ${person.lastName}`.toLowerCase();
+      const nationalId = (person.nationalId || '').toLowerCase();
+      const profession = (person.profession || '').toLowerCase();
+      const phone = (person.phone || '').toLowerCase();
+      const address = (person.currentAddress || '').toLowerCase();
+      
+      return (
+        fullName.includes(query) ||
+        nationalId.includes(query) ||
+        profession.includes(query) ||
+        phone.includes(query) ||
+        address.includes(query)
+      );
+    });
+  }, [persons, searchQuery]);
   
   if (userLoading || personsLoading) {
     return (
@@ -114,6 +140,23 @@ export default function PersonList() {
         </button>
       </div>
 
+      {/* Search indicator */}
+      {searchQuery && (
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+          <p className="text-blue-700">
+            Résultats de recherche pour "<span className="font-semibold">{searchQuery}</span>" : {filteredPersons.length} personne(s) trouvée(s)
+          </p>
+        </div>
+      )}
+
+      {/* Empty search results */}
+      {filteredPersons.length === 0 && searchQuery && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-12 text-center">
+          <p className="text-gray-500 text-lg mb-4">Aucune personne ne correspond à votre recherche</p>
+          <p className="text-gray-400">Essayez avec un autre terme de recherche</p>
+        </div>
+      )}
+
       {/* Tableau des personnes */}
       <div className="bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
@@ -141,7 +184,7 @@ export default function PersonList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {persons.map((person) => (
+              {filteredPersons.map((person) => (
                 <tr 
                   key={person.nationalId} 
                   className="hover:bg-gray-50 transition cursor-pointer"
@@ -197,7 +240,11 @@ export default function PersonList() {
       {/* Footer avec stats et pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Total: <span className="font-semibold">{persons.length}</span> personne(s)
+          {searchQuery ? (
+            <span>Affichage: <span className="font-semibold">{filteredPersons.length}</span> sur <span className="font-semibold">{persons?.length || 0}</span> personne(s)</span>
+          ) : (
+            <span>Total: <span className="font-semibold">{persons?.length || 0}</span> personne(s)</span>
+          )}
         </div>
         <div className="flex items-center space-x-2">
           <button 
