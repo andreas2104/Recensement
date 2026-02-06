@@ -23,6 +23,19 @@ export interface PersonneFormData {
   maritalStatus?: string;
   status?: string;
   isVoter?: boolean;
+  taxes?: Tax[];
+}
+
+export interface Tax {
+  taxId: number;
+  personId: number;
+  year: number;
+  amount: number;
+  paidAmount: number;
+  isPaid: boolean;
+  paidAt?: string;
+  dueDate?: string;
+  description?: string;
 }
 
 /* ==================== FETCH ALL PERSONS ==================== */
@@ -56,7 +69,7 @@ export const usePersons = () => {
 };
 
 /* ==================== FETCH SINGLE PERSON ==================== */
-const fetchPerson = async (id: string): Promise<Person> => {
+const fetchPerson = async (id: string): Promise<Person & { taxes?: Tax[] }> => {
   console.log("🔍 Fetching person:", id);
 
   const response = await fetch(`/api/persons/${id}`, {
