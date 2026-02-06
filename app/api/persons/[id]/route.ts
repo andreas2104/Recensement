@@ -18,13 +18,13 @@ export async function GET(
 
     const person = await prisma.person.findUnique({
       where: { personId: id },
-      // Optionnel : sélectionner les champs spécifiques si besoin
-      // select: {
-      //   personId: true,
-      //   firstName: true,
-      //   lastName: true,
-      //   // ... autres champs
-      // }
+      include: {
+        taxes: {
+          orderBy: {
+            year: 'desc'
+          }
+        }
+      }
     });
     if (!person) {
       return NextResponse.json(

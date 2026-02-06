@@ -177,6 +177,60 @@ export default function PersonDetailPage() {
               </div>
             </div>
           </div>
+          
+          {/* Section Taxes */}
+          <div className="mt-8">
+             <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900 text-lg">Historique des Taxes</h3>
+              {/* Future feature: Add Tax Button */}
+            </div>
+            
+            <div className="bg-gray-50 shadow rounded-lg overflow-hidden border border-gray-200">
+               {person.taxes && person.taxes.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Année</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payé</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Paiement</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {person.taxes.map((tax) => (
+                        <tr key={tax.taxId} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tax.year}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tax.description || '-'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tax.amount.toLocaleString()} Ar</td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tax.paidAmount.toLocaleString()} Ar</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              tax.isPaid 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {tax.isPaid ? 'Payé' : 'Non Payé'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {tax.paidAt ? formatDate(tax.paidAt) : '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+               ) : (
+                <div className="p-8 text-center text-gray-500">
+                  <p>Aucune taxe enregistrée pour cette personne.</p>
+                </div>
+               )}
+            </div>
+            
+          </div>
 
           {/* Boutons d'action */}
           <div className="mt-6 pt-6 border-t flex gap-4 justify-between">
