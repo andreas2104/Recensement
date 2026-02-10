@@ -89,15 +89,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const exists = await prisma.person.findUnique({
-      where: { nationalId: body.nationalId },
-    });
+    // If nationalId is missing or empty, treat it as null (e.g. for minors)
+    if (!body.nationalId) {
+      body.nationalId = null;
+    }
 
-    if (exists) {
-      return NextResponse.json(
-        { error: "National ID already exists" },
-        { status: 409 }
-      );
+    if (body.nationalId) {
+      const exists = await prisma.person.findUnique({
+        where: { nationalId: body.nationalId },
+      });
+
+      if (exists) {
+        return NextResponse.json(
+          { error: "National ID already exists" },
+          { status: 409 }
+        );
+      }
     }
 
     const newPerson = await prisma.person.create({
