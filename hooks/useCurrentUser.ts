@@ -15,7 +15,7 @@ const fetchCurrentUser = async (): Promise<User> => {
     credentials: "include",
   });
 
-  console.log("📡 Response status:", response.status);
+  console.log("📡 Response status:", response .status);
   console.log("📡 Response ok:", response.ok);
 
   if (!response.ok) {

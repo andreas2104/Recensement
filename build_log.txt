@@ -1,0 +1,110 @@
+
+> train@0.1.0 build /home/youngs/Desktop/devweb/FOKONTANY/REGISTRATION
+> next build
+
+   ▲ Next.js 15.3.2
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 7.0s
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./app/(auth)/connexion/page.tsx
+179:16  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/dashboard/page.tsx
+3:10  Error: 'useState' is defined but never used.  @typescript-eslint/no-unused-vars
+16:25  Error: 'Line' is defined but never used.  @typescript-eslint/no-unused-vars
+37:17  Error: 'electeursData' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+38:38  Error: 'isLoadingTaxStats' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+227:9  Error: 'chartOptions' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+246:37  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+263:38  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(user)/isvoter/page.tsx
+251:29  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/persons/[id]/edit/page.tsx
+91:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+158:84  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+176:31  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+303:72  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/persons/[id]/page.tsx
+79:75  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/persons/components/PersonList.tsx
+147:41  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+147:94  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/(user)/persons/create/page.tsx
+49:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:31  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+193:72  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/persons/page.tsx
+1:8  Error: 'AddPerson' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(user)/taxes/[id]/edit/page.tsx
+50:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+102:80  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+119:54  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+175:101  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/taxes/[id]/page.tsx
+51:28  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/taxes/add/page.tsx
+3:20  Error: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+217:19  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(user)/taxes/page.tsx
+4:52  Error: 'Tax' is defined but never used.  @typescript-eslint/no-unused-vars
+11:40  Error: 'refetch' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+12:17  Error: 'persons' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/(user)/user/page.tsx
+10:7  Error: 'fetchUser' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/auth/[...nexauth]/route.ts
+62:31  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/persons/[id]/route.ts
+40:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+100:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+144:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/persons/import/route.ts
+5:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+107:22  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+203:59  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+204:45  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+218:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+242:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/persons/route.ts
+4:10  Error: 'deflate' is defined but never used.  @typescript-eslint/no-unused-vars
+38:27  Error: 'req' is defined but never used.  @typescript-eslint/no-unused-vars
+44:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+118:15  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/taxes/[id]/pay/route.ts
+49:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/taxes/[id]/route.ts
+55:23  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+79:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+110:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/taxes/route.ts
+12:18  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+100:19  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/adminUtils.ts
+19:43  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+29:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+ ELIFECYCLE  Command failed with exit code 1.

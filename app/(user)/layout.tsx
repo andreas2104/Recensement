@@ -241,6 +241,7 @@ const Sidebar = ({ isMobileMenuOpen, toggleMobileMenu }: SidebarProps) => {
       return `${baseClasses} bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-l-4 border-blue-500 shadow-sm`;
     } else {
       return `${baseClasses} hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100`;
+      
     }
   };
 
